@@ -1,0 +1,145 @@
+body {
+    font-family: 'Arial', sans-serif;
+    background-color: #f4f4f4;
+    margin: 0;
+    padding: 0;
+    display: flex;
+}
+
+.sidebar {
+    width: 250px;
+    background-color: #FF921C;
+    color: white;
+    height: 100vh;
+    position: fixed;
+    transition: transform 0.3s ease;
+    transform: translateX(0);
+    padding-top: 20px;
+    box-shadow: 2px 0 5px rgba(0, 0, 0, 0.1);
+}
+
+.sidebar.active {
+    transform: translateX(-100%);
+}
+
+.sidebar h2 {
+    text-align: center;
+    padding: 15px;
+    margin: 0;
+    font-size: 24px;
+    background-color: #ECA427;
+    border-radius: 5px;
+}
+
+.sidebar ul {
+    list-style: none;
+    padding: 0;
+}
+
+.sidebar ul li {
+    padding: 10px 15px;
+}
+
+.sidebar ul li a {
+    color: white;
+    text-decoration: none;
+    display: block;
+    transition: background-color 0.3s;
+    border-radius: 5px;
+}
+
+.sidebar ul li a:hover {
+    background-color: #ECA427;
+}
+
+.main-content {
+    margin-left: 250px;
+    padding: 20px;
+    flex-grow: 1;
+    transition: margin-left 0.3s ease;
+}
+
+.main-content header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    background-color: #ecf0f1;
+    padding: 10px 20px;
+    border-radius: 5px;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+}
+
+.main-content header h1 {
+    margin: 0;
+    font-size: 20px;
+}
+
+.main-content header p {
+    margin: 0;
+}
+
+.content {
+    max-width: full;
+    margin: 20px auto;
+    padding: 20px;
+    background-color: #fff;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+    border-radius: 8px;
+}
+
+h1 {
+    text-align: center;
+    margin-bottom: 30px;
+    color: #333;
+}
+
+.faq-item {
+    margin-bottom: 20px;
+    border-bottom: 1px solid #eee;
+    padding-bottom: 15px;
+}
+
+/* Styling untuk kolom pertanyaan FAQ */
+.faq-question {
+    background-color: #FF921C;  /* Warna Orange */
+    padding: 15px;
+    cursor: pointer;
+    border-radius: 5px 5px 0 0;
+    transition: background-color 0.3s ease;
+}
+
+.faq-question h2 {
+    margin: 0;
+    font-size: 1.2em;
+    color: #fff;  /* Warna teks putih untuk kontras */
+}
+
+.faq-question:hover {
+    background-color: #ECA427;  /* Warna Orange lebih gelap saat hover */
+}
+
+
+.faq-answer {
+    display: none;
+    padding: 15px;
+    background-color: #fff;
+    border-radius: 0 0 5px 5px;
+    line-height: 1.6;
+}
+
+.faq-answer p {
+    margin-bottom: 10px;
+}
+
+@media (max-width: 768px) {
+    .sidebar {
+        width: 100%;
+        position: relative;
+        height: auto;
+        transform: translateX(0);
+    }
+
+    .main-content {
+        margin-left: 0;
+    }
+}

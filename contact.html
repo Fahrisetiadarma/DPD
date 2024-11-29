@@ -1,0 +1,158 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <link href="https://cdn.jsdelivr.net/npm/remixicon@4.3.0/fonts/remixicon.css" rel="stylesheet" />
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha3/dist/css/bootstrap.min.css" rel="stylesheet" />
+    <link rel="stylesheet" href="css/styles.css" />
+    <title>Contact - LMSMAGANG</title>
+    <style>
+      body {
+        padding: 0 15px;
+        display: flex;
+        flex-direction: column;
+        min-height: 100vh; /* Menjaga body setidaknya setinggi layar */
+      }
+
+      h1.text-primary {
+        color: orange; /* Warna "Contact Us" menjadi oranye */
+        font-size: 2.5rem;
+      }
+
+      .icon__wrapper {
+        font-size: 3rem;
+        width: 80px;
+        height: 80px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        margin: 0 auto 10px;
+        transition: transform 0.3s, color 0.3s;
+      }
+
+      .icon__wrapper:hover {
+        transform: scale(1.1);
+        color: orange; /* Warna hover menjadi oranye */
+      }
+
+      .contact-link {
+        text-decoration: none;
+        color: inherit;
+      }
+
+      .contact-link:hover {
+        text-decoration: none;
+      }
+
+      @media (max-width: 768px) {
+        h1.text-primary {
+          font-size: 2rem;
+        }
+
+        .icon__wrapper {
+          font-size: 2.5rem;
+          width: 70px;
+          height: 70px;
+        }
+      }
+
+      @media (max-width: 576px) {
+        h1.text-primary {
+          font-size: 1.8rem;
+        }
+
+        .icon__wrapper {
+          font-size: 2rem;
+          width: 60px;
+          height: 60px;
+        }
+      }
+
+      main {
+        flex-grow: 1; /* Memastikan konten utama mengambil ruang tersisa */
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        text-align: center;
+      }
+
+      footer {
+        background-color: #333;
+        color: white;
+        padding: 20px 10px;
+        text-align: center;
+        margin-top: 40px;
+      }
+    </style>
+  </head>
+  <body>
+    <nav>
+      <div class="nav__header">
+        <div class="nav__logo">
+          <a href="index.html">LMS<span>MAGANG</span></a>
+        </div>
+        <div class="nav__menu__btn" id="menu-btn">
+          <span><i class="ri-menu-line"></i></span>
+        </div>
+      </div>
+      <ul class="nav__links" id="nav-links">
+        <li><a href="kesanpesan.php">Kesan dan Pesan</a></li>
+        <li><a href="about.html">About Us</a></li>
+        <li><a href="contact.html">Contact</a></li>
+        <li><a href="signin.php" class="login">Login</a></li>
+      </ul>
+    </nav>
+
+    <main>
+      <h1 class="text-primary mb-4">Contact Us</h1>
+      <p class="text-muted mb-5">
+        Hubungi kami melalui informasi di bawah ini:
+      </p>
+      <div class="row row-cols-1 row-cols-sm-2 row-cols-md-4 g-4 w-100">
+        <div class="col">
+          <a href="https://www.instagram.com/dpdrijogja/" target="_blank" class="contact-link">
+            <div class="icon__wrapper">
+              <i class="ri-instagram-line"></i>
+            </div>
+            Instagram
+          </a>
+        </div>
+        <div class="col">
+          <a href="tel:+6281234567890" class="contact-link">
+            <div class="icon__wrapper">
+              <i class="ri-phone-line"></i>
+            </div>
+            +62 812 3456 7890
+          </a>
+        </div>
+        <div class="col">
+          <a href="jogja@dpd.go.id" class="contact-link">
+            <div class="icon__wrapper">
+              <i class="ri-mail-line"></i>
+            </div>
+            jogja@dpd.go.id
+          </a>
+        </div>
+        <div class="col">
+          <a href="https://www.youtube.com/@dpdrijogja" target="_blank" class="contact-link">
+            <div class="icon__wrapper">
+              <i class="ri-youtube-line"></i>
+            </div>
+            YouTube
+          </a>
+        </div>
+      </div>
+    </main>
+
+    <!-- Revisi Footer -->
+    <footer>
+      <p>Copyright © 2024 DPD Yogyakarta. All Rights Reserved.</p>
+    </footer>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha3/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="https://unpkg.com/scrollreveal"></script>
+    <script src="main.js"></script>
+  </body>
+</html>

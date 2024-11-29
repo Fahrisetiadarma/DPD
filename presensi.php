@@ -82,6 +82,31 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && strtolower($role) === 'magang') {
         }
     }
 }
+
+// Ambil data filter tanggal dari query string
+$filter_date = $_GET['filter_date'] ?? '';
+
+// Ambil data presensi dengan filter tanggal untuk Admin dan Pembimbing
+$attendances = [];
+if (strtolower($role) === 'admin' || strtolower($role) === 'pembimbing') {
+    if ($filter_date) {
+        // Query dengan filter tanggal
+        $stmt = $pdo->prepare("SELECT presensi.*, users.Nama 
+                               FROM presensi 
+                               JOIN users ON presensi.UserID = users.UserID 
+                               WHERE presensi.tanggal = :filter_date 
+                               ORDER BY presensi.id DESC");
+        $stmt->execute(['filter_date' => $filter_date]);
+    } else {
+        // Query tanpa filter (default)
+        $stmt = $pdo->query("SELECT presensi.*, users.Nama 
+                             FROM presensi 
+                             JOIN users ON presensi.UserID = users.UserID 
+                             ORDER BY presensi.id DESC");
+    }
+    $attendances = $stmt->fetchAll(PDO::FETCH_ASSOC);
+}
+
 ?>
 
 
@@ -152,13 +177,15 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && strtolower($role) === 'magang') {
     </style>
 </head>
 <body>
+    
+    <!-- Sidebar' -->
+
     <div class="sidebar" id="sidebar">
         <h2><a href="dashboard.php" style="text-decoration: none; color: inherit;">Dashboard</a></h2>
         <ul>
             <?php if (strtolower($role) === 'admin'): ?>
                 <li><a href="user_management.php">User Management</a></li>
             <?php endif; ?>
-                <li><a href="user_management.php">User Management</a></li>
                 <li><a href="project_management.php">Project Management</a></li>
                 <li><a href="presensi.php">Presensi</a></li>
                 <li><a href="logbook.php">Logbook</a></li>
@@ -181,6 +208,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && strtolower($role) === 'magang') {
         </header>
 
         <div class="content">
+
                 <!-- Form untuk 'Magang' -->
                 <h1>Tambah Presensi</h1>
                 <?php if ($error_message): ?>
@@ -209,7 +237,15 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && strtolower($role) === 'magang') {
                     <button type="submit" class="btn-submit">Tambah Presensi</button>
                 </form>
 
-                <!-- Tabel untuk 'Admin' dan 'Pembimbing' -->
+            <!-- Filter Presensi untuk Admin dan Pembimbing' -->
+
+            <h2>Filter Presensi</h2>
+                <form method="get" style="margin-bottom: 1rem;">
+                    <label for="filter_date">Tanggal:</label>
+                    <input type="date" id="filter_date" name="filter_date" value="<?php echo htmlspecialchars($filter_date); ?>">
+                    <button type="submit" class="btn-submit">Filter</button>
+                </form>
+
                <!-- Tabel untuk 'Admin' dan 'Pembimbing' -->
             <h2>Daftar Presensi</h2>
             <table>

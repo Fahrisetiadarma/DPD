@@ -104,18 +104,20 @@ $role = isset($_SESSION['role']) ? $_SESSION['role'] : 'User';
             <a href="dashboard.php" style="text-decoration: none; color: inherit;">Dashboard</a>
         </h2>
         <ul>
-            <?php if (strtolower($role) === 'admin'): ?>
+        <?php if (strtolower($role) === 'admin'): ?>
                 <li><a href="user_management.php">User Management</a></li>
             <?php endif; ?>
-            <li><a href="project_management.php">Project Management</a></li>
-            <li><a href="presensi.php">Presensi</a></li>
-            <li><a href="logbook.php">Logbook</a></li>
-            <li><a href="laporan_akhir.php">Laporan Akhir</a></li>
-            <li><a href="knowledge_sharing.php">Knowledge Sharing</a></li>
-            <li><a href="faq.php">FAQ</a></li>
-            <li><a href="panduan.php">Panduan</a></li>
-            <li><a href="profil.php">Profil</a></li>
-            <li><a href="logout.php">Logout</a></li>
+                <li><a href="project_management.php">Project Management</a></li>
+                <li><a href="presensi.php">Presensi</a></li>
+                <li><a href="logbook.php">Logbook</a></li>
+                <li><a href="laporan_akhir.php">Laporan Akhir</a></li>
+                <li><a href="knowledge_sharing.php">Knowledge Sharing</a></li>
+                <li><a href="pengenalan_dpd.php">Pengenalan DPD RI</a></li>
+                <li><a href="kesan.php">Kesan dan Pesan</a></li>
+                <li><a href="faq.php">FAQ</a></li>
+                <li><a href="panduan.php">Panduan</a></li>
+                <li><a href="profil.php">Profil</a></li>
+                <li><a href="logout.php">Logout</a></li>
         </ul>
     </div>
 

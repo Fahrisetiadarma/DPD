@@ -53,7 +53,6 @@ if (isset($_GET['approve'])) {
 // Handle form submission
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $name = htmlspecialchars($_POST['name']);
-    $role = htmlspecialchars($_POST['role']);
     $jurusan = htmlspecialchars($_POST['jurusan']);
     $universitas = htmlspecialchars($_POST['universitas']);
     $message = htmlspecialchars($_POST['message']);
@@ -62,16 +61,16 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         // Edit existing impression
         $id = (int)$_POST['id'];
         try {
-            $stmt = $pdo->prepare("UPDATE kesan_dan_pesan SET name = ?, role = ?, jurusan = ?, universitas = ?, message = ? WHERE id = ?");
-            $stmt->execute([$name, $role, $jurusan, $universitas, $message, $id]);
+            $stmt = $pdo->prepare("UPDATE kesan_dan_pesan SET name = ?,  jurusan = ?, universitas = ?, message = ? WHERE id = ?");
+            $stmt->execute([$name,  $jurusan, $universitas, $message, $id]);
         } catch (PDOException $e) {
             die("Error updating data: " . $e->getMessage());
         }
     } else {
         // Add new impression
         try {
-            $stmt = $pdo->prepare("INSERT INTO kesan_dan_pesan (name, role, jurusan, universitas, message) VALUES (?, ?, ?, ?, ?)");
-            $stmt->execute([$name, $role, $jurusan, $universitas, $message]);
+            $stmt = $pdo->prepare("INSERT INTO kesan_dan_pesan (name, jurusan, universitas, message) VALUES (?, ?, ?, ?)");
+            $stmt->execute([$name, $jurusan, $universitas, $message]);
         } catch (PDOException $e) {
             die("Error inserting data: " . $e->getMessage());
         }
@@ -194,10 +193,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     <div class="sidebar" id="sidebar">
         <h2><a href="dashboard.php" style="text-decoration: none; color: inherit;">Dashboard</a></h2>
         <ul>
-        <?php if (strtolower($role) === 'admin'): ?>
-        <li><a href="user_management.php">User Management</a></li>
-        <?php endif; ?>
+            <?php if (strtolower($role) === 'admin'): ?>
             <li><a href="user_management.php">User Management</a></li>
+            <?php endif; ?>
             <li><a href="project_management.php">Project Management</a></li>
             <li><a href="presensi.php">Presensi</a></li>
             <li><a href="logbook.php">Logbook</a></li>

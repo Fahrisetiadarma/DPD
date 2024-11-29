@@ -5,9 +5,10 @@ session_start();
 if (!isset($_SESSION['username'])) {
     header("Location: signin.php");
     exit();
+
 }
 
-$username = $_SESSION['username'];
+$role = isset($_SESSION['role']) ? $_SESSION['role'] : 'User';
 ?>
 
 <!DOCTYPE html>
@@ -94,25 +95,29 @@ $username = $_SESSION['username'];
     <div class="sidebar" id="sidebar">
         <h2><a href="dashboard.php" style="text-decoration: none; color: inherit;">Dashboard</a></h2>
         <ul>
-            <li><a href="user_management.php">User Management</a></li>
-            <li><a href="project_management.php">Project Management</a></li>
-            <li><a href="presensi.php">Presensi</a></li>
-            <li><a href="logbook">Logbook</a></li>
-            <li><a href="laporan_akhir.php">Laporan Akhir</a></li>
-            <li><a href="knowledge_sharing.php">Knowledge Sharing</a></li>
-            <li><a href="pengenalan_dpd.php">Pengenalan DPD RI</a></li>
-            <li><a href="kesan.php">Kesan dan Pesan</a></li>
-            <li><a href="faq.php">FAQ</a></li>
-            <li><a href="panduan.php">Panduan</a></li>
-            <li><a href="profil.php">Profil</a></li>
-            <li><a href="logout.php">Logout</a></li>
+        <?php if (strtolower($role) === 'admin'): ?>
+                <li><a href="user_management.php">User Management</a></li>
+            <?php endif; ?>
+                <li><a href="project_management.php">Project Management</a></li>
+                <li><a href="presensi.php">Presensi</a></li>
+                <li><a href="logbook.php">Logbook</a></li>
+                <li><a href="laporan_akhir.php">Laporan Akhir</a></li>
+                <li><a href="knowledge_sharing.php">Knowledge Sharing</a></li>
+                <li><a href="pengenalan_dpd.php">Pengenalan DPD RI</a></li>
+                <li><a href="kesan.php">Kesan dan Pesan</a></li>
+                <li><a href="faq.php">FAQ</a></li>
+                <li><a href="panduan.php">Panduan</a></li>
+                <li><a href="profil.php">Profil</a></li>
+                <li><a href="logout.php">Logout</a></li>
         </ul>
     </div>
 
     <!-- Main Content -->
     <div class="main-content" id="main-content">
-        <header>
-            <h1>Selamat datang, <?php echo htmlspecialchars($username); ?>!</h1>
+    <header>
+            <h1>Selamat datang, <?php echo htmlspecialchars($_SESSION['username']); ?>!</h1>
+            <p>Kamu masuk sebagai <?php echo htmlspecialchars($role); ?></p>
+            <button class="toggle-btn" onclick="toggleSidebar()">☰</button>
         </header>
 
         <div class="content">

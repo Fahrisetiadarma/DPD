@@ -229,7 +229,13 @@ $entries = $stmt->fetchAll(PDO::FETCH_ASSOC);
                                 <td><?= htmlspecialchars($entry['nama']); ?></td>
                                 <td><?= htmlspecialchars($entry['judul']); ?></td>
                                 <td><a href="<?= htmlspecialchars($entry['link_ppt']); ?>" target="_blank">Lihat PPT</a></td>
-                                <td><a href="<?= htmlspecialchars($entry['link_video']); ?>" target="_blank">Lihat Video</a></td> <!-- Tampilkan link video -->
+                                <td>
+                                    <?php if (!empty($entry['link_video']) && filter_var($entry['link_video'], FILTER_VALIDATE_URL)): ?>
+                                        <a href="<?= htmlspecialchars($entry['link_video']); ?>" target="_blank">Lihat Video</a>
+                                    <?php else: ?>
+                                        Tidak tersedia
+                                    <?php endif; ?>
+                                </td>
                                 <?php if ($role === 'Admin' || $role === 'Pembimbing'): ?>
                                     <td>
                                         <form method="post">

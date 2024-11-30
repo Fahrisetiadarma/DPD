@@ -72,8 +72,18 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
     }
 }
 
-// Ambil data laporan akhir untuk Admin dan Pembimbing
-if ($role == 'Admin' || $role == 'Pembimbing') {
+// Ambil data laporan akhir berdasarkan role
+if ($role == 'Magang') {
+    // Hanya ambil laporan yang dibuat oleh magang yang sedang login
+    $stmt = $pdo->prepare("SELECT laporan_akhir.*, users.username FROM laporan_akhir 
+                           JOIN users ON laporan_akhir.UserID = users.UserID 
+                           WHERE laporan_akhir.UserID = :user_id 
+                           ORDER BY laporan_akhir.id DESC");
+    $stmt->bindParam(':user_id', $user_id, PDO::PARAM_INT);
+    $stmt->execute();
+    $reports = $stmt->fetchAll(PDO::FETCH_ASSOC);
+} elseif ($role == 'Admin' || $role == 'Pembimbing') {
+    // Admin dan Pembimbing bisa melihat semua laporan
     $stmt = $pdo->prepare("SELECT laporan_akhir.*, users.username FROM laporan_akhir 
                            JOIN users ON laporan_akhir.UserID = users.UserID 
                            ORDER BY laporan_akhir.id DESC");
@@ -130,6 +140,30 @@ if ($role == 'Admin' || $role == 'Pembimbing') {
                 <input type="date" name="date" required>
                 <button type="submit" name="add_report">Tambah Laporan</button>
             </form>
+
+            <!-- Tampilkan laporan yang sudah diajukan oleh Magang -->
+            <h2>Laporan yang Sudah Diajukan</h2>
+            <?php if (!empty($reports)): ?>
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Link</th>
+                            <th>Tanggal</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <?php foreach ($reports as $report): ?>
+                            <tr>
+                                <td><a href="<?= htmlspecialchars($report['link']); ?>" target="_blank">Lihat</a></td>
+                                <td><?= htmlspecialchars($report['tanggal']); ?></td>
+                            </tr>
+                        <?php endforeach; ?>
+                    </tbody>
+                </table>
+            <?php else: ?>
+                <p>Tidak ada laporan yang diajukan.</p>
+            <?php endif; ?>
+
         <?php elseif ($role == 'Admin' || $role == 'Pembimbing'): ?>
             <!-- Table for Admin and Pembimbing to view reports -->
             <h2>Daftar Laporan Akhir</h2>
@@ -169,17 +203,10 @@ if ($role == 'Admin' || $role == 'Pembimbing') {
 </div>
 
 <script>
-    function toggleSidebar() {
-        const sidebar = document.getElementById('sidebar');
-        const mainContent = document.getElementById('main-content');
-        sidebar.classList.toggle('active');
-        
-        if (sidebar.classList.contains('active')) {
-            mainContent.style.marginLeft = '0';
-        } else {
-            mainContent.style.marginLeft = '250px'; 
-        }
-    }
+function toggleSidebar() {
+    document.getElementById('sidebar').classList.toggle('active');
+    document.getElementById('main-content').classList.toggle('active');
+}
 </script>
 </body>
 </html>

@@ -7,6 +7,65 @@ if (!isset($_SESSION['username'])) {
 }
 
 $role = isset($_SESSION['role']) ? $_SESSION['role'] : 'User';
+
+// Sertakan koneksi database
+require_once 'db.php';
+
+// Menangani form input FAQ
+if (isset($_POST['add_faq'])) {
+    $question = $_POST['question'];
+    $answer = $_POST['answer'];
+
+    try {
+        // Menyimpan data ke dalam database menggunakan PDO
+        $stmt = $pdo->prepare("INSERT INTO faq (question, answer) VALUES (:question, :answer)");
+        $stmt->bindParam(':question', $question);
+        $stmt->bindParam(':answer', $answer);
+        $stmt->execute();
+    } catch (PDOException $e) {
+        echo "Error: " . $e->getMessage();
+    }
+}
+
+// Menangani pengeditan FAQ
+if (isset($_POST['edit_faq'])) {
+    $faq_id = $_POST['faq_id'];
+    $question = $_POST['question'];
+    $answer = $_POST['answer'];
+
+    try {
+        // Update data FAQ di database
+        $stmt = $pdo->prepare("UPDATE faq SET question = :question, answer = :answer WHERE id = :id");
+        $stmt->bindParam(':id', $faq_id);
+        $stmt->bindParam(':question', $question);
+        $stmt->bindParam(':answer', $answer);
+        $stmt->execute();
+    } catch (PDOException $e) {
+        echo "Error: " . $e->getMessage();
+    }
+}
+
+// Menangani penghapusan FAQ
+if (isset($_GET['delete_faq'])) {
+    $faq_id = $_GET['delete_faq'];
+
+    try {
+        // Menghapus FAQ dari database
+        $stmt = $pdo->prepare("DELETE FROM faq WHERE id = :id");
+        $stmt->bindParam(':id', $faq_id);
+        $stmt->execute();
+    } catch (PDOException $e) {
+        echo "Error: " . $e->getMessage();
+    }
+}
+
+// Menampilkan FAQ dari database
+try {
+    $stmt = $pdo->query("SELECT * FROM faq");
+    $faqItems = $stmt->fetchAll(PDO::FETCH_ASSOC);
+} catch (PDOException $e) {
+    echo "Error: " . $e->getMessage();
+}
 ?>
 
 <!DOCTYPE html>
@@ -15,7 +74,7 @@ $role = isset($_SESSION['role']) ? $_SESSION['role'] : 'User';
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>FAQ Section</title>
-    <link rel="stylesheet" href="css/faq.css"> <!-- Link to the CSS file -->
+    <link rel="stylesheet" href="css/faq.css">
 </head>
 <body>
     <div class="sidebar" id="sidebar">
@@ -39,63 +98,55 @@ $role = isset($_SESSION['role']) ? $_SESSION['role'] : 'User';
             <li><a href="logout.php">Logout</a></li>
         </ul>
     </div>
+
     <div class="main-content" id="main-content">
         <header>
             <h1>Welcome, <?php echo htmlspecialchars($_SESSION['username']); ?>!</h1>
             <p>You are logged in as <?php echo htmlspecialchars($role); ?></p>
             <button class="toggle-btn" onclick="toggleSidebar()">☰</button>
         </header>
+
         <div class="content">
-    <h1>Frequently Asked Questions (FAQ)</h1>
-    <div class="faq-item">
-        <div class="faq-question" onclick="toggleAnswer(1)">
-            <h2>Apa itu DPD RI DI Yogyakarta?</h2>
-        </div>
-        <div class="faq-answer" id="answer-1">
-            <p>DPD RI DI Yogyakarta adalah perwakilan daerah dari Dewan Perwakilan Daerah Republik Indonesia yang berfungsi untuk mewakili aspirasi masyarakat daerah dalam penyusunan undang-undang di tingkat nasional.</p>
-        </div>
-    </div>
-    <div class="faq-item">
-        <div class="faq-question" onclick="toggleAnswer(2)">
-            <h2>Bagaimana cara bergabung dengan DPD RI DI Yogyakarta?</h2>
-        </div>
-        <div class="faq-answer" id="answer-2">
-            <p>Untuk bergabung sebagai anggota DPD RI, calon anggota harus mengikuti proses pemilihan umum yang dilakukan setiap lima tahun sekali. DPD RI beranggotakan wakil-wakil dari tiap provinsi yang dipilih langsung oleh rakyat.</p>
-        </div>
-    </div>
-    <div class="faq-item">
-        <div class="faq-question" onclick="toggleAnswer(3)">
-            <h2>Apa tugas utama DPD RI DI Yogyakarta?</h2>
-        </div>
-        <div class="faq-answer" id="answer-3">
-            <p>Tugas utama DPD RI adalah mengawasi, memberikan masukan, dan menyetujui rancangan undang-undang yang berkaitan dengan daerah, serta memastikan kepentingan daerah terakomodasi dalam kebijakan nasional.</p>
-        </div>
-    </div>
-    <div class="faq-item">
-        <div class="faq-question" onclick="toggleAnswer(4)">
-            <h2>Bagaimana DPD RI DI Yogyakarta berperan dalam pengambilan keputusan nasional?</h2>
-        </div>
-        <div class="faq-answer" id="answer-4">
-            <p>DPD RI DI Yogyakarta berperan dengan memberikan pertimbangan atau pendapat mengenai setiap rancangan undang-undang yang berhubungan dengan daerah, serta dapat mengajukan rancangan undang-undang kepada DPR atau pemerintah.</p>
-        </div>
-    </div>
-    <div class="faq-item">
-        <div class="faq-question" onclick="toggleAnswer(5)">
-            <h2>Apakah DPD RI DI Yogyakarta memiliki program khusus untuk masyarakat?</h2>
-        </div>
-        <div class="faq-answer" id="answer-5">
-            <p>Ya, DPD RI DI Yogyakarta memiliki berbagai program yang berfokus pada pemberdayaan masyarakat, peningkatan kualitas pendidikan, kesehatan, serta pengembangan ekonomi daerah untuk kesejahteraan masyarakat.</p>
+            <h1>Frequently Asked Questions (FAQ)</h1>
+
+            <!-- FAQ Items -->
+            <?php foreach ($faqItems as $row): ?>
+            <div class="faq-item">
+                <div class="faq-question" onclick="toggleAnswer(<?php echo $row['id']; ?>)">
+                    <h2><?php echo htmlspecialchars($row['question']); ?></h2>
+                </div>
+                <div class="faq-answer" id="answer-<?php echo $row['id']; ?>">
+                    <p><?php echo htmlspecialchars($row['answer']); ?></p>
+                </div>
+
+                <!-- Tombol Edit dan Hapus untuk Admin/Pembimbing -->
+                <?php if ($role === 'Admin' || $role === 'Pembimbing'): ?>
+                <div class="faq-actions">
+                    <button onclick="editFAQ(<?php echo $row['id']; ?>)">Edit</button>
+                    <a href="?delete_faq=<?php echo $row['id']; ?>" onclick="return confirm('Apakah Anda yakin ingin menghapus FAQ ini?')">Delete</a>
+                </div>
+                <?php endif; ?>
+            </div>
+            <?php endforeach; ?>
+
+            <!-- Form untuk Admin dan Pembimbing untuk menambah FAQ -->
+            <?php if ($role === 'Admin' || $role === 'Pembimbing'): ?>
+            <h2>Tambah FAQ</h2>
+            <form method="POST">
+                <div class="form-group">
+                    <label for="question">Pertanyaan:</label>
+                    <textarea name="question" id="question" required></textarea>
+                </div>
+                <div class="form-group">
+                    <label for="answer">Jawaban:</label>
+                    <textarea name="answer" id="answer" required></textarea>
+                </div>
+                <button type="submit" name="add_faq">Tambah FAQ</button>
+            </form>
+            <?php endif; ?>
         </div>
     </div>
-    <div class="faq-item">
-        <div class="faq-question" onclick="toggleAnswer(6)">
-            <h2>Bagaimana cara mengajukan pertanyaan atau masukan kepada DPD RI DI Yogyakarta?</h2>
-        </div>
-        <div class="faq-answer" id="answer-6">
-            <p>Anda dapat mengajukan pertanyaan atau masukan melalui saluran komunikasi yang tersedia di website resmi DPD RI DIY Yogyakarta, atau melalui media sosial dan alamat email resmi yang sudah disediakan.</p>
-        </div>
-    </div>
-</div>
+
     <script>
         function toggleSidebar() {
             const sidebar = document.getElementById('sidebar');
@@ -109,13 +160,45 @@ $role = isset($_SESSION['role']) ? $_SESSION['role'] : 'User';
             }
         }
 
-        // JavaScript to toggle the visibility of the FAQ answers
         function toggleAnswer(id) {
             var answer = document.getElementById('answer-' + id);
             if (answer.style.display === "block") {
                 answer.style.display = "none";
             } else {
                 answer.style.display = "block";
+            }
+        }
+
+        function editFAQ(id) {
+            var question = prompt("Edit pertanyaan FAQ:");
+            var answer = prompt("Edit jawaban FAQ:");
+
+            if (question !== null && answer !== null) {
+                // Kirim data edit melalui POST
+                var form = document.createElement("form");
+                form.method = "POST";
+                form.action = "";
+
+                var faq_id = document.createElement("input");
+                faq_id.type = "hidden";
+                faq_id.name = "faq_id";
+                faq_id.value = id;
+
+                var faq_question = document.createElement("input");
+                faq_question.type = "hidden";
+                faq_question.name = "question";
+                faq_question.value = question;
+
+                var faq_answer = document.createElement("input");
+                faq_answer.type = "hidden";
+                faq_answer.name = "answer";
+                faq_answer.value = answer;
+
+                form.appendChild(faq_id);
+                form.appendChild(faq_question);
+                form.appendChild(faq_answer);
+                document.body.appendChild(form);
+                form.submit();
             }
         }
     </script>

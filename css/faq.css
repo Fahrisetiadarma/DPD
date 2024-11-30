@@ -1,3 +1,4 @@
+/* Global Styles */
 body {
     font-family: 'Arial', sans-serif;
     background-color: #f4f4f4;
@@ -118,7 +119,6 @@ h1 {
     background-color: #ECA427;  /* Warna Orange lebih gelap saat hover */
 }
 
-
 .faq-answer {
     display: none;
     padding: 15px;
@@ -129,6 +129,75 @@ h1 {
 
 .faq-answer p {
     margin-bottom: 10px;
+}
+
+/* Form Styling untuk menambah FAQ */
+form {
+    background-color: #fff;
+    padding: 25px;
+    margin-top: 30px;
+    border-radius: 8px;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+    max-width: 600px;
+    margin-left: auto;
+    margin-right: auto;
+}
+
+form h2 {
+    margin-bottom: 20px;
+    font-size: 1.6em;
+    font-weight: bold;
+    color: #333;
+    text-align: center;
+}
+
+form label {
+    font-size: 1em;
+    font-weight: 600;
+    margin-bottom: 10px;
+    color: #333;
+    display: block;
+}
+
+form input, form textarea {
+    width: 100%;
+    padding: 12px;
+    margin-bottom: 15px;
+    border: 1px solid #ddd;
+    border-radius: 5px;
+    font-size: 1em;
+    transition: border-color 0.3s ease;
+    box-sizing: border-box;
+}
+
+form input:focus, form textarea:focus {
+    border-color: #FF921C;  /* Fokus border dengan warna oranye */
+    outline: none;
+}
+
+form button {
+    background-color: #FF921C;  /* Warna Oranye */
+    color: white;
+    padding: 12px 20px;
+    border: none;
+    border-radius: 5px;
+    font-size: 1.2em;
+    cursor: pointer;
+    width: 100%;
+    transition: background-color 0.3s ease;
+    margin-top: 10px;
+}
+
+form button:hover {
+    background-color: #ECA427;  /* Warna Oranye lebih gelap saat hover */
+}
+
+/* Optional: Untuk error message */
+form .error {
+    color: red;
+    font-size: 14px;
+    margin-top: 10px;
+    text-align: center;
 }
 
 @media (max-width: 768px) {
@@ -142,4 +211,35 @@ h1 {
     .main-content {
         margin-left: 0;
     }
+}
+.faq-actions button,
+.faq-actions a {
+    padding: 10px 15px;
+    margin: 5px;
+    border: none;
+    border-radius: 5px;
+    font-size: 14px;
+    cursor: pointer;
+    text-decoration: none;
+    text-align: center;
+}
+
+.faq-actions button {
+    background-color: #4CAF50; /* Warna hijau */
+    color: white;
+    transition: background-color 0.3s ease;
+}
+
+.faq-actions button:hover {
+    background-color: #45a049;
+}
+
+.faq-actions a {
+    background-color: #f44336; /* Warna merah */
+    color: white;
+    transition: background-color 0.3s ease;
+}
+
+.faq-actions a:hover {
+    background-color: #d32f2f;
 }

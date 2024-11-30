@@ -8,6 +8,8 @@ if (!isset($_SESSION['username'])) {
 
 require_once 'db.php';
 
+$role = $_SESSION['role'] ?? 'User';
+
 // Cek Username dan ambil data user
 $username = $_SESSION['username'];
 $stmt = $pdo->prepare("SELECT Nama, UserID FROM users WHERE username = :username");
@@ -31,20 +33,23 @@ if (!isset($_SESSION['user']['UserID'])) {
 $attendances = [];
 $filter_date = $_GET['filter_date'] ?? '';
 
-// Query presensi berdasarkan filter tanggal
+// Query presensi berdasarkan filter tanggal dan UserID pengguna yang sedang login
 if ($filter_date) {
     $stmt = $pdo->prepare("SELECT presensi.*, users.Nama 
                            FROM presensi 
                            JOIN users ON presensi.UserID = users.UserID 
                            WHERE presensi.tanggal = :filter_date 
+                           AND presensi.UserID = :user_id
                            ORDER BY presensi.id DESC");
-    $stmt->execute(['filter_date' => $filter_date]);
+    $stmt->execute(['filter_date' => $filter_date, 'user_id' => $_SESSION['user']['UserID']]);
 } else {
-    // Query tanpa filter (default)
-    $stmt = $pdo->query("SELECT presensi.*, users.Nama 
-                         FROM presensi 
-                         JOIN users ON presensi.UserID = users.UserID 
-                         ORDER BY presensi.id DESC");
+    // Query tanpa filter (default) dengan UserID pengguna yang sedang login
+    $stmt = $pdo->prepare("SELECT presensi.*, users.Nama 
+                           FROM presensi 
+                           JOIN users ON presensi.UserID = users.UserID 
+                           WHERE presensi.UserID = :user_id
+                           ORDER BY presensi.id DESC");
+    $stmt->execute(['user_id' => $_SESSION['user']['UserID']]);
 }
 
 $attendances = $stmt->fetchAll(PDO::FETCH_ASSOC);
@@ -64,7 +69,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         // Periksa apakah presensi untuk tanggal dan jenis sudah ada
         $stmt = $pdo->prepare("SELECT COUNT(*) FROM presensi WHERE UserID = :user_id AND tanggal = :tanggal AND jenis_presensi = :jenis_presensi");
         $stmt->execute([
-            'user_id' => $userId,
+            'user_id' => $_SESSION['user']['UserID'],
             'tanggal' => $date,
             'jenis_presensi' => $jenis_presensi,
         ]);
@@ -76,7 +81,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             // Simpan presensi jika belum ada
             $stmt = $pdo->prepare("INSERT INTO presensi (UserID, tanggal, lokasi, jenis_presensi) VALUES (:user_id, :tanggal, :lokasi, :jenis_presensi)");
             if ($stmt->execute([
-                'user_id' => $userId,
+                'user_id' => $_SESSION['user']['UserID'],
                 'tanggal' => $date,
                 'lokasi' => $location,
                 'jenis_presensi' => $jenis_presensi,
@@ -179,7 +184,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     <div class="main-content" id="main-content">
         <header>
             <h1>Halo, <?php echo htmlspecialchars($username); ?>!</h1>
-            <p>Kamu masuk sebagai <?php echo htmlspecialchars($loggedInName); ?></p>
+            <p>Kamu masuk sebagai <?php echo htmlspecialchars($role); ?></p>
             <button class="toggle-btn" onclick="toggleSidebar()">☰</button>
         </header>
 
@@ -232,44 +237,40 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                     </tr>
                 </thead>
                 <tbody>
-                    <?php if ($attendances): ?>
-                        <?php foreach ($attendances as $attendance): ?>
-                            <tr>
-                                <td><?php echo htmlspecialchars($attendance['Nama']); ?></td>
-                                <td><?php echo htmlspecialchars($attendance['tanggal']); ?></td>
-                                <td><?php echo htmlspecialchars($attendance['lokasi']); ?></td>
-                                <td><?php echo htmlspecialchars($attendance['jenis_presensi']); ?></td>
-                            </tr>
-                        <?php endforeach; ?>
-                    <?php else: ?>
+                    <?php foreach ($attendances as $attendance): ?>
                         <tr>
-                            <td colspan="4">Tidak ada presensi pada tanggal ini.</td>
+                            <td><?php echo htmlspecialchars($attendance['Nama']); ?></td>
+                            <td><?php echo htmlspecialchars($attendance['tanggal']); ?></td>
+                            <td><?php echo htmlspecialchars($attendance['lokasi']); ?></td>
+                            <td><?php echo htmlspecialchars($attendance['jenis_presensi']); ?></td>
                         </tr>
-                    <?php endif; ?>
+                    <?php endforeach; ?>
                 </tbody>
             </table>
         </div>
     </div>
 
     <script>
-        function toggleSidebar() {
-            const sidebar = document.getElementById('sidebar');
-            const mainContent = document.getElementById('main-content');
-            sidebar.classList.toggle('open');
-            mainContent.classList.toggle('shifted');
-        }
-
+        // Fungsi untuk mengambil lokasi
         function getLocation() {
             if (navigator.geolocation) {
                 navigator.geolocation.getCurrentPosition(function(position) {
-                    const latitude = position.coords.latitude;
-                    const longitude = position.coords.longitude;
-                    document.getElementById('location').value = `Latitude: ${latitude}, Longitude: ${longitude}`;
+                    var locationField = document.getElementById("location");
+                    locationField.value = position.coords.latitude + ", " + position.coords.longitude;
                 });
             } else {
-                alert("Geolocation is not supported by this browser.");
+                alert("Geolocation tidak didukung oleh browser ini.");
             }
         }
+
+        // Fungsi untuk toggle sidebar
+        function toggleSidebar() {
+            var sidebar = document.getElementById("sidebar");
+            var mainContent = document.getElementById("main-content");
+            sidebar.classList.toggle("active");
+            mainContent.classList.toggle("active");
+        }
     </script>
+
 </body>
 </html>

@@ -46,11 +46,16 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
     }
 }
 
-// Ambil proyek milik user yang login hanya jika role bukan 'Magang'
+// Ambil proyek berdasarkan peran
 $projects = [];
-if (strtolower($role) !== 'magang') {
-    $stmt = $pdo->prepare("SELECT * FROM project_management WHERE UserID = :user_id");
-    $stmt->bindParam(':user_id', $user_id, PDO::PARAM_INT);
+if (strtolower($role) === 'admin') {
+    // Admin dapat melihat semua proyek
+    $stmt = $pdo->prepare("SELECT * FROM project_management");
+    $stmt->execute();
+    $projects = $stmt->fetchAll(PDO::FETCH_ASSOC);
+} elseif (strtolower($role) === 'magang') {
+    // Magang dapat melihat semua proyek (seluruh inputan sebelumnya)
+    $stmt = $pdo->prepare("SELECT * FROM project_management");
     $stmt->execute();
     $projects = $stmt->fetchAll(PDO::FETCH_ASSOC);
 }
@@ -69,20 +74,20 @@ if (strtolower($role) !== 'magang') {
         <a href="dashboard.php" style="text-decoration: none; color: inherit;">Dashboard</a>
     </h2>
     <ul>
-    <?php if (strtolower($role) === 'admin'): ?>
-                <li><a href="user_management.php">User Management</a></li>
-            <?php endif; ?>
-                <li><a href="project_management.php">Project Management</a></li>
-                <li><a href="presensi.php">Presensi</a></li>
-                <li><a href="logbook.php">Logbook</a></li>
-                <li><a href="laporan_akhir.php">Laporan Akhir</a></li>
-                <li><a href="knowledge_sharing.php">Knowledge Sharing</a></li>
-                <li><a href="pengenalan_dpd.php">Pengenalan DPD RI</a></li>
-                <li><a href="kesan.php">Kesan dan Pesan</a></li>
-                <li><a href="faq.php">FAQ</a></li>
-                <li><a href="panduan.php">Panduan</a></li>
-                <li><a href="profil.php">Profil</a></li>
-                <li><a href="logout.php">Logout</a></li>
+        <?php if (strtolower($role) === 'admin'): ?>
+            <li><a href="user_management.php">User Management</a></li>
+        <?php endif; ?>
+            <li><a href="project_management.php">Project Management</a></li>
+            <li><a href="presensi.php">Presensi</a></li>
+            <li><a href="logbook.php">Logbook</a></li>
+            <li><a href="laporan_akhir.php">Laporan Akhir</a></li>
+            <li><a href="knowledge_sharing.php">Knowledge Sharing</a></li>
+            <li><a href="pengenalan_dpd.php">Pengenalan DPD RI</a></li>
+            <li><a href="kesan.php">Kesan dan Pesan</a></li>
+            <li><a href="faq.php">FAQ</a></li>
+            <li><a href="panduan.php">Panduan</a></li>
+            <li><a href="profil.php">Profil</a></li>
+            <li><a href="logout.php">Logout</a></li>
     </ul>
 </div>
 
@@ -93,44 +98,42 @@ if (strtolower($role) !== 'magang') {
         <button class="toggle-btn" onclick="toggleSidebar()">☰</button>
     </header>
     <div class="content">
-        <?php if (strtolower($role) === 'magang'): ?>
-            <!-- Form untuk role 'Magang' -->
-            <h1>Tambah Proyek Baru</h1>
-            <form method="post">
-                <input type="text" name="title" placeholder="Judul Proyek" required>
-                <textarea name="description" placeholder="Deskripsi Proyek" required></textarea>
-                <input type="date" name="deadline" placeholder="Tanggal Deadline" required>
-                <button type="submit" name="add_project">Tambah Proyek</button>
-            </form>
-        <?php else: ?>
-            <!-- Daftar proyek untuk role 'Admin' dan 'Pembimbing' -->
-            <h1>Daftar Proyek</h1>
-            <table>
-                <thead>
+        <!-- Form untuk tambah proyek -->
+        <h1>Tambah Proyek Baru</h1>
+        <form method="post">
+            <input type="text" name="title" placeholder="Judul Proyek" required>
+            <textarea name="description" placeholder="Deskripsi Proyek" required></textarea>
+            <input type="date" name="deadline" placeholder="Tanggal Deadline" required>
+            <button type="submit" name="add_project">Tambah Proyek</button>
+        </form>
+
+        <!-- Tampilkan daftar proyek -->
+        <h1>Daftar Proyek</h1>
+        <table>
+            <thead>
+                <tr>
+                    <th>Judul Proyek</th>
+                    <th>Deskripsi</th>
+                    <th>Deadline</th>
+                    <th>Aksi</th>
+                </tr>
+            </thead>
+            <tbody>
+                <?php foreach ($projects as $project): ?>
                     <tr>
-                        <th>Judul Proyek</th>
-                        <th>Deskripsi</th>
-                        <th>Deadline</th>
-                        <th>Aksi</th>
+                        <td><?= htmlspecialchars($project['JudulProject']); ?></td>
+                        <td><?= htmlspecialchars($project['Description']); ?></td>
+                        <td><?= htmlspecialchars($project['Deadline']); ?></td>
+                        <td>
+                            <form method="post" style="display:inline-block;">
+                                <input type="hidden" name="project_id" value="<?= $project['ProjectID']; ?>">
+                                <button type="submit" name="delete_project">Hapus</button>
+                            </form>
+                        </td>
                     </tr>
-                </thead>
-                <tbody>
-                    <?php foreach ($projects as $project): ?>
-                        <tr>
-                            <td><?= htmlspecialchars($project['JudulProject']); ?></td>
-                            <td><?= htmlspecialchars($project['Description']); ?></td>
-                            <td><?= htmlspecialchars($project['Deadline']); ?></td>
-                            <td>
-                                <form method="post" style="display:inline-block;">
-                                    <input type="hidden" name="project_id" value="<?= $project['ProjectID']; ?>">
-                                    <button type="submit" name="delete_project">Hapus</button>
-                                </form>
-                            </td>
-                        </tr>
-                    <?php endforeach; ?>
-                </tbody>
-            </table>
-        <?php endif; ?>
+                <?php endforeach; ?>
+            </tbody>
+        </table>
     </div>
 </div>
 

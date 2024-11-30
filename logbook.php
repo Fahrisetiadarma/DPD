@@ -78,6 +78,7 @@ $stmt = $pdo->prepare("SELECT logbook.*, users.username FROM logbook
                        ORDER BY logbook.LogbookID DESC");
 $stmt->execute();
 $reports = $stmt->fetchAll(PDO::FETCH_ASSOC);
+$role = isset($_SESSION['role']) ? $_SESSION['role'] : 'User';
 ?>
 
 <!DOCTYPE html>
@@ -94,7 +95,9 @@ $reports = $stmt->fetchAll(PDO::FETCH_ASSOC);
         <a href="dashboard.php" style="text-decoration: none; color: inherit;">Dashboard</a>
     </h2>
     <ul>
-        <li><a href="user_management.php">User Management</a></li>
+        <?php if (strtolower($role) === 'admin'): ?>
+            <li><a href="user_management.php">User Management</a></li>
+        <?php endif; ?>
         <li><a href="project_management.php">Project Management</a></li>
         <li><a href="presensi.php">Presensi</a></li>
         <li><a href="logbook.php">Logbook</a></li>

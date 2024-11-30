@@ -187,6 +187,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     <div class="sidebar" id="sidebar">
         <h2><a href="dashboard.php" style="text-decoration: none; color: inherit;">Dashboard</a></h2>
         <ul>
+        <?php if (strtolower($role) === 'admin'): ?>
+                <li><a href="user_management.php">User Management</a></li>
+            <?php endif; ?>
             <li><a href="project_management.php">Project Management</a></li>
             <li><a href="presensi.php">Presensi</a></li>
             <li><a href="logbook.php">Logbook</a></li>
@@ -259,9 +262,12 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                     </tr>
                 </thead>
 
+            <?php if (strtolower($role) === 'admin'|| strtolower($role) === 'pembimbing'): ?>
                 <form method="post" action="generate_pdf.php">
                     <button type="submit" class="btn-submit">Rekap Presensi (PDF)</button>
                 </form>
+            <?php endif; ?>
+
                 <tbody>
                     <?php foreach ($attendances as $attendance): ?>
                         <tr>

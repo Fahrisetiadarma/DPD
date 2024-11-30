@@ -33,23 +33,43 @@ if (!isset($_SESSION['user']['UserID'])) {
 $attendances = [];
 $filter_date = $_GET['filter_date'] ?? '';
 
-// Query presensi berdasarkan filter tanggal dan UserID pengguna yang sedang login
-if ($filter_date) {
-    $stmt = $pdo->prepare("SELECT presensi.*, users.Nama 
-                           FROM presensi 
-                           JOIN users ON presensi.UserID = users.UserID 
-                           WHERE presensi.tanggal = :filter_date 
-                           AND presensi.UserID = :user_id
-                           ORDER BY presensi.id DESC");
-    $stmt->execute(['filter_date' => $filter_date, 'user_id' => $_SESSION['user']['UserID']]);
+// Cek apakah pengguna adalah Admin atau Pembimbing
+if ($role === 'Admin' || $role === 'Pembimbing') {
+    // Query untuk mengambil semua presensi
+    if ($filter_date) {
+        $stmt = $pdo->prepare("SELECT presensi.*, users.Nama 
+                               FROM presensi 
+                               JOIN users ON presensi.UserID = users.UserID 
+                               WHERE presensi.tanggal = :filter_date
+                               ORDER BY presensi.id DESC");
+        $stmt->execute(['filter_date' => $filter_date]);
+    } else {
+        // Query tanpa filter (default)
+        $stmt = $pdo->prepare("SELECT presensi.*, users.Nama 
+                               FROM presensi 
+                               JOIN users ON presensi.UserID = users.UserID 
+                               ORDER BY presensi.id DESC");
+        $stmt->execute();
+    }
 } else {
-    // Query tanpa filter (default) dengan UserID pengguna yang sedang login
-    $stmt = $pdo->prepare("SELECT presensi.*, users.Nama 
-                           FROM presensi 
-                           JOIN users ON presensi.UserID = users.UserID 
-                           WHERE presensi.UserID = :user_id
-                           ORDER BY presensi.id DESC");
-    $stmt->execute(['user_id' => $_SESSION['user']['UserID']]);
+    // Query untuk pengguna biasa (User )
+    if ($filter_date) {
+        $stmt = $pdo->prepare("SELECT presensi.*, users.Nama 
+                               FROM presensi 
+                               JOIN users ON presensi.UserID = users.UserID 
+                               WHERE presensi.tanggal = :filter_date 
+                               AND presensi.UserID = :user_id
+                               ORDER BY presensi.id DESC");
+        $stmt->execute(['filter_date' => $filter_date, 'user_id' => $_SESSION['user']['User ID']]);
+    } else {
+        // Query tanpa filter (default) dengan UserID pengguna yang sedang login
+        $stmt = $pdo->prepare("SELECT presensi.*, users.Nama 
+                               FROM presensi 
+                               JOIN users ON presensi.UserID = users.UserID 
+                               WHERE presensi.UserID = :user_id
+                               ORDER BY presensi.id DESC");
+        $stmt->execute(['user_id' => $_SESSION['user']['UserID']]);
+    }
 }
 
 $attendances = $stmt->fetchAll(PDO::FETCH_ASSOC);
@@ -225,6 +245,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 <button type="submit" class="btn-submit">Filter</button>
             </form>
 
+            
+
             <!-- Tabel Daftar Presensi -->
             <h2>Daftar Presensi</h2>
             <table>
@@ -236,6 +258,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                         <th>Jenis Presensi</th>
                     </tr>
                 </thead>
+
+                <form method="post" action="generate_pdf.php">
+                    <button type="submit" class="btn-submit">Rekap Presensi (PDF)</button>
+                </form>
                 <tbody>
                     <?php foreach ($attendances as $attendance): ?>
                         <tr>

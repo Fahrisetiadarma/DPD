@@ -106,7 +106,7 @@ $results = $stmt->fetchAll(PDO::FETCH_ASSOC); // Ambil semua data dalam bentuk a
       </div>
       <ul class="nav__links" id="nav-links">
         <li><a href="kesanpesan.php">Kesan dan Pesan</a></li>
-        <li><a href="#">About Us</a></li>
+        <li><a href="about.html">About Us</a></li>
         <li><a href="contact.html">Contact</a></li>
         <li><a href="signin.php" class="login">Login</a></li>
       </ul>
@@ -129,7 +129,7 @@ $results = $stmt->fetchAll(PDO::FETCH_ASSOC); // Ambil semua data dalam bentuk a
     </section>
 
     <footer>
-      <p>Copyright © 2024 DPD YOGYAKARTA. All Rights Reserved.</p>
+      <p>Copyright © 2024 UAD YOGYAKARTA. All Rights Reserved.</p>
     </footer>
   </body>
 </html>

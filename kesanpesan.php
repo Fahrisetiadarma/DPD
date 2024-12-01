@@ -25,7 +25,7 @@ $results = $stmt->fetchAll(PDO::FETCH_ASSOC); // Ambil semua data dalam bentuk a
         padding: 100px 20px 40px; /* Tambahkan jarak atas lebih besar */
         text-align: center;
       }
-
+/*test
       .kesan__section h2 {
         font-size: 2rem;
         color: #007bff;

@@ -10,7 +10,7 @@ if (!isset($_SESSION['username'])) {
 
 // Variabel sesi
 $role = $_SESSION['role'] ?? 'User';
-$user_id = $_SESSION['user']['UserID'] ?? null;
+$user_id = $_SESSION['user']['UserID'] ?? null; // Pastikan session menyimpan UserID dengan benar
 
 // Proses form
 if ($_SERVER['REQUEST_METHOD'] == 'POST') {
@@ -54,10 +54,15 @@ if (strtolower($role) === 'admin') {
     $stmt->execute();
     $projects = $stmt->fetchAll(PDO::FETCH_ASSOC);
 } elseif (strtolower($role) === 'magang') {
-    // Magang dapat melihat semua proyek (seluruh inputan sebelumnya)
-    $stmt = $pdo->prepare("SELECT * FROM project_management");
-    $stmt->execute();
-    $projects = $stmt->fetchAll(PDO::FETCH_ASSOC);
+    // Magang hanya dapat melihat proyek yang diinputkan oleh dirinya
+    if ($user_id !== null) { // Pastikan UserID ada dan valid
+        $stmt = $pdo->prepare("SELECT * FROM project_management WHERE UserID = :user_id");
+        $stmt->bindParam(':user_id', $user_id, PDO::PARAM_INT);
+        $stmt->execute();
+        $projects = $stmt->fetchAll(PDO::FETCH_ASSOC);
+    } else {
+        echo "User ID tidak valid!";
+    }
 }
 ?>
 

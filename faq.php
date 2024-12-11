@@ -29,19 +29,28 @@ if (isset($_POST['add_faq'])) {
 
 // Menangani pengeditan FAQ
 if (isset($_POST['edit_faq'])) {
-    $faq_id = $_POST['faq_id'];
-    $question = $_POST['question'];
-    $answer = $_POST['answer'];
+    $faq_id = $_POST['faq_id'] ?? null;
+    $question = $_POST['question'] ?? null;
+    $answer = $_POST['answer'] ?? null;
 
-    try {
-        // Update data FAQ di database
-        $stmt = $pdo->prepare("UPDATE faq SET question = :question, answer = :answer WHERE id = :id");
-        $stmt->bindParam(':id', $faq_id);
-        $stmt->bindParam(':question', $question);
-        $stmt->bindParam(':answer', $answer);
-        $stmt->execute();
-    } catch (PDOException $e) {
-        echo "Error: " . $e->getMessage();
+    // Validasi input
+    if ($faq_id && $question && $answer) {
+        try {
+            // Update data FAQ di database
+            $stmt = $pdo->prepare("UPDATE faq SET question = :question, answer = :answer WHERE id = :id");
+            $stmt->bindParam(':id', $faq_id, PDO::PARAM_INT);
+            $stmt->bindParam(':question', $question);
+            $stmt->bindParam(':answer', $answer);
+            if ($stmt->execute()) {
+                echo "<script>alert('FAQ berhasil diperbarui!');</script>";
+            } else {
+                echo "<script>alert('Gagal memperbarui FAQ.');</script>";
+            }
+        } catch (PDOException $e) {
+            echo "<script>alert('Error: {$e->getMessage()}');</script>";
+        }
+    } else {
+        echo "<script>alert('Semua field harus diisi.');</script>";
     }
 }
 
@@ -171,35 +180,47 @@ try {
 
         function editFAQ(id) {
             var question = prompt("Edit pertanyaan FAQ:");
-            var answer = prompt("Edit jawaban FAQ:");
-
-            if (question !== null && answer !== null) {
-                // Kirim data edit melalui POST
-                var form = document.createElement("form");
-                form.method = "POST";
-                form.action = "";
-
-                var faq_id = document.createElement("input");
-                faq_id.type = "hidden";
-                faq_id.name = "faq_id";
-                faq_id.value = id;
-
-                var faq_question = document.createElement("input");
-                faq_question.type = "hidden";
-                faq_question.name = "question";
-                faq_question.value = question;
-
-                var faq_answer = document.createElement("input");
-                faq_answer.type = "hidden";
-                faq_answer.name = "answer";
-                faq_answer.value = answer;
-
-                form.appendChild(faq_id);
-                form.appendChild(faq_question);
-                form.appendChild(faq_answer);
-                document.body.appendChild(form);
-                form.submit();
+            if (question === null || question.trim() === "") {
+                alert("Pertanyaan tidak boleh kosong.");
+                return;
             }
+            var answer = prompt("Edit jawaban FAQ:");
+            if (answer === null || answer.trim() === "") {
+                alert("Jawaban tidak boleh kosong.");
+                return;
+            }
+
+            var form = document.createElement("form");
+            form.method = "POST";
+            form.action = "";
+
+            var faq_id = document.createElement("input");
+            faq_id.type = "hidden";
+            faq_id.name = "faq_id";
+            faq_id.value = id;
+
+            var faq_question = document.createElement("input");
+            faq_question.type = "hidden";
+            faq_question.name = "question";
+            faq_question.value = question;
+
+            var faq_answer = document.createElement("input");
+            faq_answer.type = "hidden";
+            faq_answer.name = "answer";
+            faq_answer.value = answer;
+
+            var edit_action = document.createElement("input");
+            edit_action.type = "hidden";
+            edit_action.name = "edit_faq";
+            edit_action.value = "1";
+
+            form.appendChild(faq_id);
+            form.appendChild(faq_question);
+            form.appendChild(faq_answer);
+            form.appendChild(edit_action);
+
+            document.body.appendChild(form);
+            form.submit();
         }
     </script>
 </body>

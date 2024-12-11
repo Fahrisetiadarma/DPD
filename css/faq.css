@@ -225,14 +225,20 @@ form .error {
 }
 
 .faq-actions button {
-    background-color: #4CAF50; /* Warna hijau */
-    color: white;
+    background-color: #FFA500; /* Warna orange */
+    color: white; /* Warna teks putih */
+    border: none;
+    padding: 10px 20px;
+    font-size: 14px;
+    cursor: pointer;
+    border-radius: 5px;
     transition: background-color 0.3s ease;
 }
 
 .faq-actions button:hover {
-    background-color: #45a049;
+    background-color: #FF8C00; /* Warna orange yang lebih gelap saat hover */
 }
+
 
 .faq-actions a {
     background-color: #f44336; /* Warna merah */

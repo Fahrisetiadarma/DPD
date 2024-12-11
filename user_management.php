@@ -24,8 +24,32 @@ $updateSuccess = false;
 if ($_SERVER['REQUEST_METHOD'] == 'POST') {
     if (isset($_POST['delete_user'])) {
         $id = (int)$_POST['user_id'];
-        $stmt = $pdo->prepare("DELETE FROM users WHERE UserID = :id");
-        $stmt->execute(['id' => $id]);
+        
+        try {
+            // Mulai transaksi untuk memastikan konsistensi data
+            $pdo->beginTransaction();
+
+            // Hapus data terkait di tabel presensi terlebih dahulu
+            $stmt = $pdo->prepare("DELETE FROM presensi WHERE UserID = :id");
+            $stmt->execute(['id' => $id]);
+
+            // Hapus data terkait di tabel logbook (jika ada)
+            $stmt = $pdo->prepare("DELETE FROM logbook WHERE UserID = :id");
+            $stmt->execute(['id' => $id]);
+
+            // Hapus data pengguna di tabel users
+            $stmt = $pdo->prepare("DELETE FROM users WHERE UserID = :id");
+            $stmt->execute(['id' => $id]);
+
+            // Commit transaksi jika tidak ada error
+            $pdo->commit();
+
+            echo "<script>alert('Pengguna dan data terkait berhasil dihapus.'); window.location.href='user_management.php';</script>";
+        } catch (PDOException $e) {
+            // Rollback transaksi jika terjadi kesalahan
+            $pdo->rollBack();
+            echo "<script>alert('Error: " . $e->getMessage() . "'); window.location.href='user_management.php';</script>";
+        }
     } elseif (isset($_POST['update_role'])) {
         $id = (int)$_POST['user_id'];
         $newRole = $_POST['role'];

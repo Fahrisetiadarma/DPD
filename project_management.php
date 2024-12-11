@@ -8,9 +8,20 @@ if (!isset($_SESSION['username'])) {
     exit();
 }
 
-// Variabel sesi
+// Ambil informasi sesi
 $role = $_SESSION['role'] ?? 'User';
-$user_id = $_SESSION['user']['UserID'] ?? null; // Pastikan session menyimpan UserID dengan benar
+$username = $_SESSION['username'];
+
+// Cari UserID berdasarkan username
+$stmt = $pdo->prepare("SELECT UserID FROM users WHERE username = ?");
+$stmt->execute([$username]);
+$user = $stmt->fetch();
+
+if (!$user) {
+    die("Error: User ID tidak ditemukan. Pastikan username valid.");
+}
+
+$user_id = $user['UserID'];
 
 // Proses form
 if ($_SERVER['REQUEST_METHOD'] == 'POST') {
@@ -31,38 +42,47 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
             $stmt->bindParam(':deadline', $deadline);
             $stmt->execute();
         } else {
-            echo "Semua field harus diisi!";
+            echo "<p style='color:red;'>Semua field harus diisi!</p>";
         }
     } elseif (isset($_POST['delete_project'])) {
         $project_id = intval($_POST['project_id']);
 
-        // Hapus proyek hanya jika milik user yang login
-        $stmt = $pdo->prepare(
-            "DELETE FROM project_management WHERE ProjectID = :project_id AND UserID = :user_id"
-        );
-        $stmt->bindParam(':project_id', $project_id, PDO::PARAM_INT);
-        $stmt->bindParam(':user_id', $user_id, PDO::PARAM_INT);
+        // Hapus proyek hanya jika milik user yang login atau jika user adalah admin/pembimbing
+        if (strtolower($role) === 'admin' || strtolower($role) === 'pembimbing') {
+            // Admin dan Pembimbing dapat menghapus proyek tanpa batasan
+            $stmt = $pdo->prepare(
+                "DELETE FROM project_management WHERE ProjectID = :project_id"
+            );
+            $stmt->bindParam(':project_id', $project_id, PDO::PARAM_INT);
+        } else {
+            // Magang hanya dapat menghapus proyek mereka sendiri
+            $stmt = $pdo->prepare(
+                "DELETE FROM project_management WHERE ProjectID = :project_id AND UserID = :user_id"
+            );
+            $stmt->bindParam(':user_id', $user_id, PDO::PARAM_INT);
+            $stmt->bindParam(':project_id', $project_id, PDO::PARAM_INT);
+        }
         $stmt->execute();
     }
 }
 
 // Ambil proyek berdasarkan peran
 $projects = [];
-if (strtolower($role) === 'admin') {
-    // Admin dapat melihat semua proyek
-    $stmt = $pdo->prepare("SELECT * FROM project_management");
+if (strtolower($role) === 'admin' || strtolower($role) === 'pembimbing') {
+    // Admin dan Pembimbing dapat melihat semua proyek
+    $stmt = $pdo->prepare("SELECT pm.*, u.username FROM project_management pm JOIN users u ON pm.UserID = u.UserID");
     $stmt->execute();
     $projects = $stmt->fetchAll(PDO::FETCH_ASSOC);
 } elseif (strtolower($role) === 'magang') {
-    // Magang hanya dapat melihat proyek yang diinputkan oleh dirinya
-    if ($user_id !== null) { // Pastikan UserID ada dan valid
-        $stmt = $pdo->prepare("SELECT * FROM project_management WHERE UserID = :user_id");
-        $stmt->bindParam(':user_id', $user_id, PDO::PARAM_INT);
-        $stmt->execute();
-        $projects = $stmt->fetchAll(PDO::FETCH_ASSOC);
-    } else {
-        echo "User ID tidak valid!";
-    }
+    // Magang hanya melihat proyek yang mereka input
+    $stmt = $pdo->prepare("SELECT pm.*, u.username FROM project_management pm JOIN users u ON pm.UserID = u.UserID WHERE pm.UserID = ?");
+    $stmt->execute([$user_id]);
+    $projects = $stmt->fetchAll(PDO::FETCH_ASSOC);
+} else {
+    // Untuk peran lain, dapatkan proyek mereka sendiri
+    $stmt = $pdo->prepare("SELECT pm.*, u.username FROM project_management pm JOIN users u ON pm.UserID = u.UserID WHERE pm.UserID = ?");
+    $stmt->execute([$user_id]);
+    $projects = $stmt->fetchAll(PDO::FETCH_ASSOC);
 }
 ?>
 

@@ -9,12 +9,24 @@ if (!isset($_SESSION['username'])) {
 require_once 'db.php';
 
 $role = isset($_SESSION['role']) ? $_SESSION['role'] : 'User';
+$username = $_SESSION['username']; // Get the username from the session
 
 // Fetch impressions from the database only for Admin and Pembimbing
 $impressions = [];
 if ($role == 'Admin' || $role == 'Pembimbing') {
     try {
         $stmt = $pdo->query("SELECT * FROM kesan_dan_pesan ORDER BY id DESC");
+        $impressions = $stmt->fetchAll(PDO::FETCH_ASSOC);
+    } catch (PDOException $e) {
+        die("Error fetching data: " . $e->getMessage());
+    }
+}
+
+// Fetch only impressions by the logged-in user for Magang
+if ($role == 'Magang') {
+    try {
+        $stmt = $pdo->prepare("SELECT * FROM kesan_dan_pesan WHERE username = ? ORDER BY id DESC");
+        $stmt->execute([$username]);
         $impressions = $stmt->fetchAll(PDO::FETCH_ASSOC);
     } catch (PDOException $e) {
         die("Error fetching data: " . $e->getMessage());
@@ -32,8 +44,30 @@ if (isset($_GET['edit'])) {
         if (!$editImpression) {
             die("Data not found for editing.");
         }
+        // Check if Magang is trying to edit someone else's impression
+        if ($role == 'Magang' && $editImpression['username'] !== $username) {
+            die("You can only edit your own impressions.");
+        }
     } catch (PDOException $e) {
         die("Error fetching data for edit: " . $e->getMessage());
+    }
+}
+
+// Handle delete action
+if (isset($_GET['delete'])) {
+    $deleteId = (int)$_GET['delete'];
+    try {
+        // Only Admin and Pembimbing can delete
+        if ($role == 'Admin' || $role == 'Pembimbing') {
+            $stmt = $pdo->prepare("DELETE FROM kesan_dan_pesan WHERE id = ?");
+            $stmt->execute([$deleteId]);
+            header("Location: kesan.php");
+            exit();
+        } else {
+            die("You do not have permission to delete this impression.");
+        }
+    } catch (PDOException $e) {
+        die("Error deleting data: " . $e->getMessage());
     }
 }
 
@@ -61,16 +95,16 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         // Edit existing impression
         $id = (int)$_POST['id'];
         try {
-            $stmt = $pdo->prepare("UPDATE kesan_dan_pesan SET name = ?,  jurusan = ?, universitas = ?, message = ? WHERE id = ?");
-            $stmt->execute([$name,  $jurusan, $universitas, $message, $id]);
+            $stmt = $pdo->prepare("UPDATE kesan_dan_pesan SET name = ?, jurusan = ?, universitas = ?, message = ? WHERE id = ?");
+            $stmt->execute([$name, $jurusan, $universitas, $message, $id]);
         } catch (PDOException $e) {
             die("Error updating data: " . $e->getMessage());
         }
     } else {
         // Add new impression
         try {
-            $stmt = $pdo->prepare("INSERT INTO kesan_dan_pesan (name, jurusan, universitas, message) VALUES (?, ?, ?, ?)");
-            $stmt->execute([$name, $jurusan, $universitas, $message]);
+            $stmt = $pdo->prepare("INSERT INTO kesan_dan_pesan (name, jurusan, universitas, message, username) VALUES (?, ?, ?, ?, ?)");
+            $stmt->execute([$name, $jurusan, $universitas, $message, $username]); // Store the username for Magang
         } catch (PDOException $e) {
             die("Error inserting data: " . $e->getMessage());
         }
@@ -251,36 +285,38 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             <?php endif; ?>
 
             <!-- Daftar Kesan dan Pesan -->
-            <?php if ($role == 'Admin'): ?>
-                <div>
-                    <h2>Daftar Kesan dan Pesan</h2>
-                    <?php if (count($impressions) > 0): ?>
-                        <?php foreach ($impressions as $impression): ?>
-                            <div class="impression-card">
-                                <h2><?php echo htmlspecialchars($impression['name']); ?></h2>
-                                <p>Jurusan: <?php echo htmlspecialchars($impression['jurusan']); ?></p>
-                                <p>Universitas: <?php echo htmlspecialchars($impression['universitas']); ?></p>
-                                <p><?php echo nl2br(htmlspecialchars($impression['message'])); ?></p>
-                                <p>Status: 
-                                    <strong style="color: 
-                                        <?php echo $impression['status'] === 'approved' ? 'green' : 'orange'; ?>">
-                                        <?php echo ucfirst($impression['status']); ?>
-                                    </strong>
-                                </p>
-                                <?php if ($impression['status'] !== 'approved'): ?>
-                                    <a href="kesan.php?approve=<?php echo $impression['id']; ?>" class="approve-btn">Approve</a>
-                                <?php endif; ?>
-                            </div>
-
-                        <?php endforeach; ?>
-                    <?php else: ?>
-                        <p>No impressions yet.</p>
+                    <?php if ($role == 'Admin' || $role == 'Pembimbing'): ?>
+                        <div>
+                            <h2>Daftar Kesan dan Pesan</h2>
+                            <?php if (count($impressions) > 0): ?>
+                                <?php foreach ($impressions as $impression): ?>
+                                    <div class="impression-card">
+                                        <h2><?php echo htmlspecialchars($impression['name']); ?></h2>
+                                        <p>Jurusan: <?php echo htmlspecialchars($impression['jurusan']); ?></p>
+                                        <p>Universitas: <?php echo htmlspecialchars($impression['universitas']); ?></p>
+                                        <p><?php echo nl2br(htmlspecialchars($impression['message'])); ?></p>
+                                        <p>Status: 
+                                            <strong style="color: 
+                                                <?php echo $impression['status'] === 'approved' ? 'green' : 'orange'; ?>">
+                                                <?php echo ucfirst($impression['status']); ?>
+                                            </strong>
+                                        </p>
+                                        <?php if ($impression['status'] !== 'approved'): ?>
+                                            <a href="kesan.php?approve=<?php echo $impression['id']; ?>" class="approve-btn">Approve</a>
+                                        <?php endif; ?>
+                                        <!-- Delete button for Admin and Pembimbing -->
+                                        <a href="kesan.php?delete=<?php echo $impression['id']; ?>" 
+                                        class="approve-btn" style="background-color: #E53E3E; margin-top: 10px; text-decoration: none;">
+                                            Delete
+                                        </a>
+                                    </div>
+                                <?php endforeach; ?>
+                            <?php else: ?>
+                                <p>No impressions yet.</p>
+                            <?php endif; ?>
+                        </div>
                     <?php endif; ?>
                 </div>
-            <?php endif; ?>
-        </div>
-    </div>
-
     <script src="js/sidebar.js"></script>
 </body>
 </html>
